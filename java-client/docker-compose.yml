@@ -1,0 +1,51 @@
+services:
+  
+  cloud:
+    image: cloud
+    hostname: cloud
+    container_name: cloud
+    environment:
+      BROKER: redis
+      PORT: 6379
+      TOPIC: traffic
+      URL: https://api.airplanes.live/v2/point/36.1716/-115.1391/200
+      # URL: https://adsbexchange.com/api/aircraft/json/lat/34/lon/-119/dist/500/
+    networks:
+      - aware-network
+  
+  puddle:
+    image: puddle
+    hostname: puddle
+    container_name: puddle
+    depends_on:
+      - cloud
+    environment:
+      BROKER: redis
+      PORT: 6379
+      TOPIC: rumbedis
+    networks:
+      - aware-network
+
+  redis:
+    container_name: redis
+    image: redis
+    hostname: redis
+    ports:
+      - 6379:6379
+    networks:
+      - aware-network
+  
+  rumbedis:
+    image: rumbedis
+    container_name: rumbedis
+    depends_on:
+      - cloud
+    # ports:
+    #   - 8529:8529
+    networks:
+      - aware-network
+
+networks:
+  aware-network:
+    driver: bridge
+    name: aware_network
